@@ -9,8 +9,7 @@ import userRoutes   from './routes/users.js';
 import recordRoutes from './routes/records.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const app  = express();
-const PORT = process.env.PORT ?? 3000;
+const app = express();
 
 app.use(cors());
 app.use(express.json());
@@ -67,7 +66,5 @@ app.use((err, _req, res, _next) => {
   console.error('[ERROR]', err);
   res.status(err.status ?? 500).json({ error: 'Internal server error', message: err.message });
 });
-
-app.listen(PORT, () => console.log(`Financial Dashboard API on http://localhost:${PORT}`));
 
 export default app;
