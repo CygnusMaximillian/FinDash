@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinBoard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── LOGIN / REGISTER ───────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">📊 FinBoard</div>
+
+    <!-- Tab switcher -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Sign in</button>
+      <button class="auth-tab" data-tab="register">Register</button>
+    </div>
+
+    <!-- ── SIGN IN ── -->
+    <div id="tab-login">
+      <div id="login-error" class="alert hidden"></div>
+      <form id="login-form">
+        <label>Email
+          <input type="email" id="l-email" placeholder="admin@finboard.dev" required />
+        </label>
+        <label>Password
+          <input type="password" id="l-password" placeholder="••••••••" required />
+        </label>
+        <label>Role
+          <select id="l-role">
+            <option value="admin">Admin</option>
+            <option value="analyst">Analyst</option>
+            <option value="viewer">Viewer</option>
+          </select>
+        </label>
+        <button type="submit" class="btn-primary">Sign in</button>
+      </form>
+      <p class="hint">Demo — admin@finboard.dev / Admin1234!</p>
+    </div>
+
+    <!-- ── REGISTER ── -->
+    <div id="tab-register" class="hidden">
+      <div id="register-error"   class="alert hidden"></div>
+      <div id="register-success" class="alert-success hidden"></div>
+      <form id="register-form">
+        <label>Full Name
+          <input type="text" id="r-name" placeholder="Jane Smith" required />
+        </label>
+        <label>Email
+          <input type="email" id="r-email" placeholder="jane@example.com" required />
+        </label>
+        <label>Password
+          <input type="password" id="r-password" placeholder="Min 8 characters" minlength="8" required />
+        </label>
+        <label>Confirm Password
+          <input type="password" id="r-confirm" placeholder="Repeat password" required />
+        </label>
+        <label>Role
+          <select id="r-role">
+            <option value="viewer">Viewer — read-only dashboard</option>
+            <option value="analyst">Analyst — view records &amp; insights</option>
+            <option value="admin">Admin — full access</option>
+          </select>
+        </label>
+        <button type="submit" class="btn-primary">Create account</button>
+      </form>
+      <p class="hint">After registering, sign in with your credentials.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── APP SHELL ──────────────────────────────────────────── -->
+<div id="app" class="hidden">
+  <aside id="sidebar">
+    <div class="sidebar-logo">📊 FinBoard</div>
+    <nav>
+      <a href="#" class="nav-item active" data-view="dashboard">Dashboard</a>
+      <a href="#" class="nav-item" data-view="records">Records</a>
+      <a href="#" class="nav-item admin-only hidden" data-view="users">Users</a>
+    </nav>
+    <div class="sidebar-footer">
+      <span id="user-badge"></span>
+      <button id="logout-btn" class="btn-ghost">Sign out</button>
+    </div>
+  </aside>
+
+  <main id="content">
+
+    <!-- DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <span id="poll-indicator" class="poll-dot" title="Live polling active"></span>
+      </div>
+      <div id="kpi-row" class="kpi-row"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3>By Type</h3>
+          <canvas id="chart-donut"></canvas>
+        </div>
+        <div class="chart-card wide">
+          <h3>Amount by Type</h3>
+          <canvas id="chart-bar"></canvas>
+        </div>
+      </div>
+      <div class="card analyst-only hidden">
+        <h3>Recent Activity</h3>
+        <table id="recent-table">
+          <thead><tr><th>Title</th><th>Type</th><th>Amount</th><th>Updated</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- RECORDS VIEW -->
+    <section id="view-records" class="view hidden">
+      <div class="page-header">
+        <h1>Financial Records</h1>
+        <button id="new-record-btn" class="btn-primary admin-only hidden">+ New Record</button>
+      </div>
+      <div class="filters">
+        <input id="search-input" type="text" placeholder="Search title…" />
+        <select id="type-filter">
+          <option value="">All types</option>
+          <option value="revenue">Revenue</option>
+          <option value="expense">Expense</option>
+          <option value="asset">Asset</option>
+          <option value="liability">Liability</option>
+          <option value="equity">Equity</option>
+        </select>
+      </div>
+      <div class="card">
+        <table id="records-table">
+          <thead>
+            <tr>
+              <th>Title</th><th>Type</th><th>Amount</th><th>Currency</th>
+              <th>Date</th><th class="admin-only hidden">Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="records-pagination" class="pagination"></div>
+      </div>
+    </section>
+
+    <!-- USERS VIEW (admin only) -->
+    <section id="view-users" class="view hidden">
+      <div class="page-header">
+        <h1>User Management</h1>
+        <button id="new-user-btn" class="btn-primary">+ New User</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-role="admin">Admins</button>
+        <button class="tab" data-role="analyst">Analysts</button>
+        <button class="tab" data-role="viewer">Viewers</button>
+      </div>
+      <div class="card">
+        <table id="users-table">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── MODALS ─────────────────────────────────────────────── -->
+<div id="modal-overlay" class="hidden">
+  <div id="modal-box">
+    <button id="modal-close" class="modal-close">✕</button>
+    <h2 id="modal-title"></h2>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
